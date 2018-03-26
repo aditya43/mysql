@@ -1,0 +1,485 @@
+Regular Expressions
+
+Modes :
+
+    Standard            =  /REGULAR_EXPRESSION/
+    Global              =  /g
+    Case-Insensitive    =  /i
+    Multiline           =  /m
+    Dot-matches-all     =  /s
+
+/*--------------------------------------------------------------------------------*/
+
+Metacharacters :
+
+    * Following is the list of all metacharacters :
+        \    .    *    +    -    {}    []    ^    $    |    ?    ()    :    !    =
+
+    * Can have more than one meaning.
+        - Depends on how it is used in context.
+
+/*--------------------------------------------------------------------------------*/
+
+Wildcard Metacharacter . (dot) :
+
+    .     Match any character except newline.
+
+    * For e.g.
+
+        /h.t/
+        Matches : "hat", "hot" and "hit", but not "heat".
+
+
+        /9.00/
+        Matches : "9.00", "9500", "9-00" and so on.
+
+
+        /.a.a.a/
+        Matches : "banana", "papaya", " ababa".
+
+/*--------------------------------------------------------------------------------*/
+
+Escaping Metacharacter :
+
+    \     Escape the next character.
+
+    * For e.g.
+
+        \9\.00\
+        Matches : "9.00" only.
+
+    * Quotation marks are not Metacharacters, do not need to be escaped.
+
+/*--------------------------------------------------------------------------------*/
+
+Other Special Characters
+
+    * Spaces
+    * Tabs (\t)
+    * Line Returns (\r, \n, \r\n)
+    * Non-printable characters (rarely encountered) like
+        - bell (\a)
+        - escape (\e)
+        - form feed (\f)
+        - vertical tab (\v)
+    * ASCII or ANSI codes
+        - Codes that control appearance of a text terminal
+        - For e.g.
+            To match : 0xA9
+            Use regex : \xA9
+
+/*--------------------------------------------------------------------------------*/
+
+Character Sets :
+
+    * Matches any one of several characters.
+        - But ONLY one character.
+        - Order of characters does not matter.
+    * For e.g.
+        /[aeiou]/
+        Matches : Any one vowel.
+
+        /gr[ea]y/
+        Matches : Only "grey" and "gray".
+
+        /gr[ea]t/
+        Matches : Does not match "great". [ea] means match either "e" or "a".
+                  So it can match only "gret" and "grat".
+
+/*--------------------------------------------------------------------------------*/
+
+Negative Character Set :
+
+    ^     Negate a character set.
+
+    * Not any one of several characters.
+        - Add ^ as the first character inside a character set.
+        - Still represents one character.
+    * For e.g.
+        /[^aeiou]/
+        Matches: any one consonant (non vowel).
+
+        /see[^mn]/
+        Matches : "seek" and "sees" but not "seem" or "seen".
+                  Matches "see " but not "see".
+
+/*--------------------------------------------------------------------------------*/
+
+Metacharacters Inside Character Sets :
+
+    * Metacharacters inside character sets are already escaped.
+        - Do not need to escape them again.
+    * Metacharacters that need to be escaped inside character sets are :
+        ]      -      ^      \
+    * For e.g.
+        /h[abc.xyz]t/
+        Matches : "hat" and "h.t" but not "hot", "h t" and so on. Because in this
+                  expression, dot (.) has a literal meaning i.e. it literally
+                  means dot and not the metacharacters meaning i.e. any character.
+
+        /var[([][0-9][\])]/
+        Matches : "var(2)" and "var[9]"
+
+        /file[0\-\\_]1/
+        Matches: "file01", "file-1", "file\1" and "file_1".
+
+/*--------------------------------------------------------------------------------*/
+
+Shorthand Character Sets :
+
+     Shorthand          Meaning                  Equivalent
+    ------------------------------------------------------------------
+        \d              Digit                    [0-9]
+        \w              Word Character           [a-zA-Z0-9_]
+        \s              Whitespace               [ \t\r\n]
+        \D              Not Digit                [^0-9]
+        \W              Not Word Character       [^a-zA-Z0-9_]
+        \S              Not Whitespace           [^ \t\r\n]
+
+
+    * More About Word Character : \w
+        - Underscore is a word character.
+        - Hyphen is not a word character.
+    * For e.g.
+        /\d\d\d\d/
+        Matches : "1986", but not "text".
+
+        /\w\w\w/
+        Matches : "ABC", "123" and "1_A".
+
+        /\w\s\w\w/
+        Matches "I am", but not "Am I".
+
+    * /[^\d\s]/ is not the same as [\D\S]. Here is a breakdown why :
+        - /[^\d\s]/ means : NOT a digit OR a space character.
+        - /[\D\S]/ means : EITHER NOT a digit OR NOT a space character.
+
+/*--------------------------------------------------------------------------------*/
+
+Repetition Metacharacters :
+
+    *    Preceding item zero or more times.
+    +    Preceding item one or more times.
+    ?    Preceding item zero or one time.
+
+/*--------------------------------------------------------------------------------*/
+
+Quantified Repetition :
+
+    * Syntax : {min,max}
+        - "min" and "max" are positive numbers.
+        - "min" must always be included, can be zero.
+        - "max" is optional.
+
+    * For e.g.
+        \d{4,8}
+        Matches : numbers with four to eight digits.
+
+        \d{4}
+        Matches : numbers with exactly four digits.
+
+        \d{4,}
+        Matches : numbers with four or more digits.
+
+        \d{0,}
+        is the same as \d*
+        i.e. 0 or more digits.
+
+        \d{1,}
+        is the same as \d+
+        i.e. at least 1 or more digits.
+
+        /\d{3}-\d{3}-\d{4}/
+        Matches most U.S. phone numbers
+
+        /A{1,2} bonds/
+        Matches : "A bonds" and "AA bonds", but not "AAA binds".
+
+/*--------------------------------------------------------------------------------*/
+
+Greedy Vs. Lazy Expressions :
+
+    * Standard repetition quantifiers are greedy.
+        - i.e. Expression tries to match the longest possible string.
+    * Greedy Strategy :
+        - Match as much as possible before giving control to the next expression part.
+    * Lazy Strategy :
+        - Match as little as possible before giving control to the next expression part.
+        - To make any quantifier lazy, simply attach question mark next to them.
+            - For e.g. Syntax :
+                *?
+                +?
+                {min,max}?
+                ??
+
+/*--------------------------------------------------------------------------------*/
+
+Grouping :
+
+    * Why do we use grouping :
+        - To apply repetition operators to a group.
+        - Makes expressions easier to read.
+        - To capture group for use in matching and replacing.
+    * We cannot use grouping inside character set. i.e. "(REGEX)".
+    * For e.g.
+        /(abc)+/
+        Matches : "abc" and "abcabcabc" and so on.
+
+        /(in)?dependent/
+        Matches : "independent" and "dependent".
+
+/*--------------------------------------------------------------------------------*/
+
+Alternation Metacharacter :
+
+    |     Match previous or next expression.
+
+    * "|" is an OR operator.
+        - Either match expression on the left or match expression on the right.
+        - Ordered, leftmost expression gets precedence.
+        - Multiple choices can be daisy-chained.
+        - Group alternation expressions to keep them distinct.
+    * For e.g.
+        /apple|orange/
+        Matches : "apple" and "orange".
+
+        /abc|def|ghi|jkl/
+        Matches : "abc", "def", "ghi" and"jkl". This is called daisy-chaining.
+
+        /w(ei|ie)rd/
+        Matches : Both the "weird" and "wierd".
+
+/*--------------------------------------------------------------------------------*/
+
+Repeating And Nesting Alternation :
+
+    * For e.g.
+        /(AA|BB|CC){6}/
+        Matches : "AABBCCAABB" and so on. It means match a string with exacly
+                  6 combinations of "AA" OR "BB" OR "CC".
+
+        /(\d\d|[A-Z][A-Z]){3}/
+        Matches : "112233", "AABBCC", "AA66ZZ" and "11AA44".
+
+/*--------------------------------------------------------------------------------*/
+
+Anchors - START And END Anchors :
+
+    ^       Start of string/line.
+    $       End of string/line.
+    \A      Start of string, but never end of line.
+    \Z      End of string, but never end of line.
+
+    * Anchors references a position and not an actual character.
+        - They are zero-width.
+        - In other words, they actually tells regex engines where to expect those characters to occur.
+
+/*--------------------------------------------------------------------------------*/
+
+Multiline Mode (\m) :
+
+    * Single-line Mode :
+        - "^" and "$" do not match at line breaks.
+        - "\A" and "\Z" do not match at line breaks.
+        - Many Unix tools support only single line.
+    * Multiline Mode :
+        - "^" and "$" will match at the start and end of lines.
+        - "\A" and "\Z" do not match at line breaks.
+        - Most languages usually offer a multiline option.
+        - To turn on multiline mode, put "\m" at the end. For e.g.
+            - PHP : preg_match(/^regex$/m, "string");
+            - JavaScript : /^regex$/m
+
+/*--------------------------------------------------------------------------------*/
+
+Word Boundaries :
+
+    \b     Word boundary (start/end of word).
+    \B     Not a word boundary.
+
+    * Word characters are : [A-Za-z0-9_].
+    * For e.g.
+        /\b(\w+)\b/
+        Matches : This will capture all words from the text.
+                  It will capture only "top" out of "top-notch" input.
+
+        /\B(w+)\B/
+        Matches : "hi" and "es" out of "This is a test.".
+
+        Input : "apples and oranges"
+        No Match For Regex : /(apples)\b(and)\b(oranges)/
+        Match : /(apples)\b \b(and)\b \b(oranges)/
+
+/*--------------------------------------------------------------------------------*/
+
+Capturing Groups and Backreferences
+
+    * Data matched by grouped expressions are captured.
+        - Stores the matched portion in parentheses.
+            - /a(p{2}l)e/ matches "apple" and stores "ppl".
+            - Stored the data matched, and not the expression.
+    * Backreferences allows access to captured data.
+        - Refer to first backreferance with "\1".
+        - Some regex engines use $1 through $9 to access captured data.
+    * For e.g.
+
+        /(apples) to \1/
+        Matches : "apples to apples".
+
+        /(ab)(cd)(ef)\3\2\1/
+        Matches : "abcdefefcdab".
+
+        /<(i|em)>.+?<\/\1>/
+        Matches : "<i>Hello</i>" and "<em>Hello</em>".
+                Notice we have used "?" near "+" to make it not greedy.
+
+        /\b([A-Z][a-z]+)\b\s\b\1son\b/
+        Matches : "John Johnson", "Evan Evanson", but not "Steve Smith ".
+
+        /(A?)B\1/
+        Matches : "ABA" and "B".
+
+/*--------------------------------------------------------------------------------*/
+
+Non Capturing Group Expressions :
+
+    ?:     Specify a non-capturing group.
+
+    * Turns off capture and backreferances.
+    * Use of it :
+        - Opimize for speed.
+        - Preserve space for more captures.
+    * Syntax : /(?:regex)/
+
+/*--------------------------------------------------------------------------------*/
+
+Lookaround Assertitions :
+
+    * 2 Types of Assertitions :
+        - Look Ahead Assertitions.
+            - Positive Look Ahead Assertitions.
+            - Negative Look Ahead Assertitions.
+        - Look Behind Assertitions.
+            - Positive Look Behind Assertitions.
+            - Negative Look Behind Assertitions.
+    * If the lookahead expression fails, the whole match fails.
+
+/*--------------------------------------------------------------------------------*/
+
+* Positive Look Ahead Assertition :
+
+    ?=      Positive look ahead assertion.
+
+    * Syntax : /(?=regex)/
+    * For e.g.
+
+        /(?=seashore)sea/
+        Matches : "sea" in "seashore", but not "seaside".
+                  We can also write above regex as following :
+                  /sea(?=shore)/
+
+
+        To find all words having comma next to them, and to capture only words without commas :
+        /\b(\w)+\b(?=,)/
+
+
+        To require strings (e.g passwords) to have at least 1 digit and 1 capital letter in 'em :
+        ^(?=.*\d)(?=.*[A-Z]).{6,13}$
+
+/*--------------------------------------------------------------------------------*/
+
+* Negative Look Ahead Assertition :
+
+    ?!      Negative look ahead assertion.
+
+    * Syntax : /(?!regex)/
+    * For e.g.
+
+        /(?!seashore)sea/
+        Matches : "sea" in "seaside", but not in "seashore".
+                  We can also write above regex as following :
+                  /sea(?!shore)/
+
+
+        To capture the last occurance of word "black" in a sentence :
+        "The black dog followed the black car into the black night".
+        /(\bblack\b)(?!.*\1)/
+
+/*--------------------------------------------------------------------------------*/
+
+* Look Behind Assertition :
+
+    ?<=      Positive look behind assertion.
+    ?<!      Negative look behind assertion.
+
+    * Syntax :
+        /(?<=regex)/
+        /(?<!regex)/
+
+    * For e.g.
+
+        /(?<=base)ball/
+        Matches : "ball" in "baseball" but not in "football".
+                  We can also write above regex as following :
+                  /ball(?<=baseball)/
+
+        /(?<!base)ball/
+        Matches : "ball" in "football" but not in "baseball".
+
+/*--------------------------------------------------------------------------------*/
+
+Unicode In Regular Expressions :
+
+    * Unicode indicator : "\u" (in PHP "\x").
+        - "\u" followed by a four-digit hexadecimal number (0000-FFFF).
+        - For e.g.
+
+            /caf\u00E9/
+            Matches "café" but not "cafe".
+
+    * Supported By : Java, JavaScript, .NET, Python, Ruby.
+    * Perl and PHP use "\x" instead of "\u".
+
+/*--------------------------------------------------------------------------------*/
+
+Unicode Wildcard :
+
+    \X      Unicode Wildcard Character.
+
+    * Matches any single character.
+    * Always matches line breaks (like /./s).
+    * For E.g.
+
+        /caf\X/
+        Matches : both "café" and "cafe".
+
+    * Supported by Perl and PHP.
+
+/*--------------------------------------------------------------------------------*/
+
+Unicode Wildcard And Properties :
+
+    L        Letter
+    M        Mark (Accents)
+    Z        Separator (Whitespace)
+    S        Symbol
+    N        Number
+    P        Punctuation
+    C        Other
+
+    * Syntax : /\p{property}/. For e.g.
+        /\p{Mark}/ or /\p{M}/ Matches any "mark" (accents).
+        /\p{Letter}/ or /\p{L}/ Matches any letter.
+    * Use "\p{property}" for positive and "\P{property}" for negative.
+
+/*--------------------------------------------------------------------------------*/
+
+Some Regular Expressions :
+
+    * To match Email Addresses (By Aditya Hajare) :
+        \^[\w\.\-%+\d]+@[\w\-\d]+\.(?:(?:[\w\-\d]+\.)*)?\w+$\gm
+
+    * To match any URLs with optional query parameters (By Aditya Hajare) :
+        \^(?:(?:https|http|ftp){1}:\/\/)?(?:[\w]{3}\.)?(?:[\w-]+\.)+[\w-]+(?:\/?.+)$\gm
+
+/*--------------------------------------------------------------------------------*/
